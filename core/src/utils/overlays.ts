@@ -131,6 +131,7 @@ export const createOverlay = <T extends HTMLIonOverlayElement>(
 };
 
 const isOverlayHidden = (overlay: Element) => overlay.classList.contains('overlay-hidden');
+const isOverlayBeingDismissed = (overlay: Element) => overlay.hasAttribute("data-being-dismissed");
 
 /**
  * Focuses a particular element in an overlay. If the element
@@ -443,7 +444,7 @@ export const getOverlays = (doc: Document, selector?: string): HTMLIonOverlayEle
  * @param overlayTag The selector for the overlay, defaults to Ionic overlay components.
  */
 const getPresentedOverlays = (doc: Document, overlayTag?: string): HTMLIonOverlayElement[] => {
-  return getOverlays(doc, overlayTag).filter((o) => !isOverlayHidden(o));
+  return getOverlays(doc, overlayTag).filter((o) => !isOverlayHidden(o) && !isOverlayBeingDismissed(o));
 };
 
 /**
@@ -631,6 +632,7 @@ export const dismiss = async <OverlayDismissOptions>(
   }
 
   const lastOverlay = doc !== undefined && getPresentedOverlays(doc).length === 1;
+  overlay.el.setAttribute("data-being-dismissed", "true");
 
   /**
    * If this is the last visible overlay then
@@ -689,6 +691,7 @@ export const dismiss = async <OverlayDismissOptions>(
     console.error(err);
   }
 
+  overlay.el.removeAttribute("data-being-dismissed");
   overlay.el.remove();
 
   revealOverlaysToScreenReaders();
